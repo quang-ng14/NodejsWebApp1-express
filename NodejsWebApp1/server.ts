@@ -4,6 +4,12 @@ import fs = require("fs");
 import ws from "ws";
 import Stream from "node-rtsp-stream";
 import { AddressInfo } from 'net';
+import path = require('path');
+
+import changeExtension = require('./utils/changeExtension');
+import findVideos = require('./utils/findVideos');
+const Recorder = require('node-rtsp-recorder').Recorder
+
 const port = 80;
 const _streamUrl = 'rtsp://34.127.2.194:554';
 var app = express();
@@ -60,6 +66,103 @@ let rtspConvToWs4 = new Stream({
         '-r': 30 // options with required values specify the value after the key
     }
 });
+
+
+var dataDate;
+var dataHour;
+var videoDirectory = `${__dirname}/video_test/cam1/${dataDate}/video`;
+var nameFile;
+
+app.get("/index2", function (req, res) {
+    res.sendFile(__dirname + "/templates/index2.html");
+});
+
+app.post('/add-time', function (req, res) {
+    if (req.body) {
+        dataDate = req.body.dayChosen;
+        dataHour = req.body.hourChosen;
+        videoDirectory = `${__dirname}/video_test/cam1/${dataDate}/video`;
+
+        // ham change extension
+        //changeExtension(videoDirectory);
+    }
+    res.status(200).json({
+        status: 'success',
+        path: videoDirectory
+    })
+})
+// extname()
+app.get('/video-record', async function (req, res) {
+    console.log(videoDirectory);
+    console.log(dataHour);
+    const dataRecord = await findVideos(videoDirectory, dataHour);
+    console.log(dataRecord);
+    res.status(200).json({
+        status: 'success',
+        dataRecord
+    })
+})
+
+app.post('/video1', function (req, res) {
+    console.log(req.body);
+    if (req.body) {
+        nameFile = req.body;
+    }
+
+    res.status(200).json({
+        nameFile
+    })
+
+})
+
+app.get("/video", function (req, res) {
+    let range = req.headers.range;
+    if (!range) {
+        // res.status(400).send("requires range header!");
+        range = 'bytes=0-';
+    }
+
+    const videoPath = `${__dirname}/video_test/cam1/${dataDate}/video/${nameFile.dataName}`;
+    //const videoPath = `${__dirname}/video_test/cam1/2022-07-23/video/18-37-08.mp4`;
+    //console.log('22+' + nameFile.dataName);
+    const videoSize = fs.statSync(videoPath).size;
+    const CHUNK_SIZE = 10 ** 6;
+    const start = Number(range.replace(/\D/g, ""));
+    const end = Math.min(start + CHUNK_SIZE, videoSize - 1);
+    const contentLength = end - start + 1;
+    const headers = {
+        "Content-Range": `bytes ${start}-${end}/${videoSize}`,
+        "Accept-Ranges": "bytes",
+        "Content-Length": contentLength,
+        "Content-Type": "video/mp4",
+    };
+    res.writeHead(206, headers);
+    const videoStream = fs.createReadStream(videoPath, { start, end });
+    console.log('ready to stream');
+    videoStream.pipe(res);
+});
+
+
+
+
+var RecordPath = __dirname + '/video_test/';
+var rec = new Recorder({
+    url: 'rtsp://34.127.2.194:554/cam1',
+    timeLimit: 30, // time in seconds for each segmented video file
+    folder: RecordPath,
+    //folder: 'D:/Download/NodejsWebApp1-express-master/NodejsWebApp1/video_test',
+    name: 'cam1',
+    directoryPathFormat: 'YYYY-MM-D',
+    fileNameFormat: 'HH-mm-ss',
+})
+rec.startRecording();
+
+setTimeout(() => {
+    console.log('Stopping Recording')
+    rec.stopRecording()
+    rec = null
+}, 300000)
+
 
 let server = app.listen(port, () => {
     let addressInfo = server.address() as AddressInfo;

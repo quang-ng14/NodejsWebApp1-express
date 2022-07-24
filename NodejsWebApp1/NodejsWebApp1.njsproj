@@ -44,6 +44,17 @@
     <Content Include="templates\cam4.html">
       <SubType>Code</SubType>
     </Content>
+    <Content Include="templates\index2.html">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Include="templates\indexcopy.html">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Include="templates\video-record.html">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Include="utils\changeExtension.js" />
+    <Content Include="utils\findVideos.js" />
     <Content Include="www\favicon.ico" />
     <None Include="server.ts" />
     <Content Include="templates\index.html">
@@ -54,6 +65,7 @@
     <Content Include="README.md" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="utils\" />
     <Folder Include="templates\" />
     <Folder Include="www\" />
   </ItemGroup>
