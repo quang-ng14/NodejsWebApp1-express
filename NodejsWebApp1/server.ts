@@ -75,7 +75,8 @@ var videoDirectory = `${__dirname}/video_test/cam1/${dataDate}/video`;
 var nameFile;
 
 app.get("/record", function (req, res) {
-    res.sendFile(__dirname + "/templates/index2.html");
+    //res.sendFile(__dirname + "/templates/index2.html");
+    res.render("index2.html", { title: "Record"});
 });
 
 app.post('/add-time', function (req, res) {
