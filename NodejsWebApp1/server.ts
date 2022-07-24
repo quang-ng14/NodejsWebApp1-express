@@ -14,19 +14,20 @@ const port = 80;
 const _streamUrl = 'rtsp://34.127.2.194:554';
 var app = express();
 app.use(express.static('www'));
+app.use(express.json());
 app.engine('html', require('ejs').renderFile);
 app.set('view engine', 'ejs');
 app.set('views', __dirname + "/templates");
 
 app.get('/', (req, res) => {
     //res.contentType("text/plain");
-    res.render("index.html", { title: "Stream", streamHost: "34.143.192.209"/* "localhost"  "34.143.192.209" */ });
+    res.render("index.html", { title: "Stream", streamHost: "localhost"/* "localhost"  "34.143.192.209" */ });
     //res.sendFile(__dirname + "/templates/index.html");
 })
 app.get('/cam/:id', (req, res) => {
     //res.contentType("text/plain");
     let camId = req.params.id;
-    res.render("cam" + camId + ".html", { title: "Stream", streamHost: "34.143.192.209" });
+    res.render("cam" + camId + ".html", { title: "Stream", streamHost: "localhost" });
     //res.sendFile(__dirname + "/templates/index.html");
 })
 
@@ -73,7 +74,7 @@ var dataHour;
 var videoDirectory = `${__dirname}/video_test/cam1/${dataDate}/video`;
 var nameFile;
 
-app.get("/index2", function (req, res) {
+app.get("/record", function (req, res) {
     res.sendFile(__dirname + "/templates/index2.html");
 });
 
@@ -82,7 +83,7 @@ app.post('/add-time', function (req, res) {
         dataDate = req.body.dayChosen;
         dataHour = req.body.hourChosen;
         videoDirectory = `${__dirname}/video_test/cam1/${dataDate}/video`;
-
+        console.log('2+ ' + dataDate + dataHour);
         // ham change extension
         //changeExtension(videoDirectory);
     }
@@ -91,9 +92,11 @@ app.post('/add-time', function (req, res) {
         path: videoDirectory
     })
 })
+
 // extname()
 app.get('/video-record', async function (req, res) {
     console.log(videoDirectory);
+    console.log(dataDate);
     console.log(dataHour);
     const dataRecord = await findVideos(videoDirectory, dataHour);
     console.log(dataRecord);
