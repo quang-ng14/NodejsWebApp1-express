@@ -13,7 +13,7 @@ const Recorder = require('node-rtsp-recorder').Recorder
 const port = 80;
 const _streamUrl = 'rtsp://34.127.2.194:554';
 var app = express();
-app.use(express.static('www'));
+app.use(express.static('templates'));
 app.use(express.json());
 app.engine('html', require('ejs').renderFile);
 app.set('view engine', 'ejs');
@@ -28,6 +28,12 @@ app.get('/cam/:id', (req, res) => {
     //res.contentType("text/plain");
     let camId = req.params.id;
     res.render("cam" + camId + ".html", { title: "Stream", streamHost: "localhost" });
+    //res.sendFile(__dirname + "/templates/index.html");
+})
+
+app.get('/login', (req, res) => {
+    //res.contentType("text/plain");
+    res.render("login.html", { title: "Login" });
     //res.sendFile(__dirname + "/templates/index.html");
 })
 
@@ -117,6 +123,25 @@ app.post('/video1', function (req, res) {
         nameFile
     })
 
+})
+
+var username, password;
+app.post('/login1', function (req, res) {
+    if (req.body) {
+        username = req.body.username;
+        password = req.body.password;
+    }
+
+    if (username === 'quang' && password === '14012000') {
+        res.status(200).json({
+            isSuccess: true
+        })
+    }
+    else {
+        res.status(200).json({
+            isSuccess: false
+        })
+    }
 })
 
 app.get("/video", function (req, res) {
